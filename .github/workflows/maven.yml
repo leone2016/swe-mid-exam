@@ -1,4 +1,4 @@
-name: Customer Mgmt Java App CI with Maven
+name: UDS CI
 
 on:
   workflow_dispatch:
