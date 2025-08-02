@@ -31,6 +31,7 @@ jobs:
         run: |
           mvn -B package --file ./pom.xml
           echo "jar_path=./target/udsapp.jar" >> $GITHUB_OUTPUT
+
       - name: Upload jar as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -40,13 +41,17 @@ jobs:
   tag:
     needs: build
     runs-on: ubuntu-latest
+
+    outputs:
+      release_version: ${{ needs.build.outputs.release_version }}
+
     env:
       GH_PAT: ${{ secrets.GH_PAT }}
 
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Necesario para crear un tag
+          fetch-depth: 0  # Required for tags
           token: ${{ secrets.GH_PAT }}
 
       - name: Set up Git user
@@ -60,31 +65,24 @@ jobs:
           git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }} ${{ needs.build.outputs.release_version }}
 
   release:
-    needs: build
+    needs: tag
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Necesario para crear un tag
+          fetch-depth: 0
 
       - name: Download built jar
         uses: actions/download-artifact@v4
         with:
           name: app-jar
-      - name: Upload Release to GitHub (debug)
+
+      - name: Upload Release to GitHub
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.build.outputs.release_version }}
-          name: Release ${{ needs.build.outputs.release_version }}
+          tag_name: ${{ needs.tag.outputs.release_version }}
+          name: Release ${{ needs.tag.outputs.release_version }}
           files: udsapp.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-      - name: Create Release Without Uploading Files (test)
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ needs.build.outputs.release_version }}
-          name: Release ${{ needs.build.outputs.release_version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-          
