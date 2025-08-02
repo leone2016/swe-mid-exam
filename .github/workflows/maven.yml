@@ -30,7 +30,7 @@ jobs:
         id: build
         run: |
           mvn -B package --file ./pom.xml
-          echo "jar_path=./target/pams-jar-with-dependencies.jar" >> $GITHUB_OUTPUT
+          echo "jar_path=./target/udsapp.jar" >> $GITHUB_OUTPUT
       - name: Upload jar as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -77,7 +77,7 @@ jobs:
         with:
           tag_name: ${{ needs.build.outputs.release_version }}
           name: Release ${{ needs.build.outputs.release_version }}
-          files: pams-jar-with-dependencies.jar
+          files: udsapp.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       - name: Create Release Without Uploading Files (test)
